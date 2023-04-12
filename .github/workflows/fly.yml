@@ -1,0 +1,25 @@
+name: Fly Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  deploy:
+      name: Deploy app
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - uses: superfly/flyctl-actions/setup-flyctl@master
+        - run: |
+            flyctl deploy -a ${{ secrets.FLY_APP }}
+            flyctl secrets set BINGAI_TOKEN=${{ secrets.BING_TOKEN }} CHATGPT_TOKEN=${{ secrets.CHATGPT_TOKEN }} OPENAI_KEY=${{ secrets.OPENAI_KEY }} SEARCH=1 MEILI_MASTER_KEY=${{ secrets.MEILI_MASTER_KEY }} MEILI_HOST='https://ms-7d4beedc1ec9-3122.sfo.meilisearch.io' MEILI_HTTP_ADDR='ms-7d4beedc1ec9-3122.sfo.meilisearch.io' -a ${{ secrets.FLY_APP }}
+          env:
+            FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+            BING_TOKEN: ${{ secrets.BING_TOKEN }}
+            MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
+            CHATGPT_TOKEN: ${{ secrets.CHATGPT_TOKEN }}
+            OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
