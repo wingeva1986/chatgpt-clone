@@ -17,7 +17,17 @@ const optionText =
 import store from '~/store';
 
 function Settings(props) {
-  const { readonly, model, chatGptLabel, promptPrefix, temperature, topP, freqP, presP, setOption } = props;
+  const {
+    readonly,
+    model,
+    chatGptLabel,
+    promptPrefix,
+    temperature,
+    topP,
+    freqP,
+    presP,
+    setOption
+  } = props;
 
   const endpointsConfig = useRecoilValue(store.endpointsConfig);
 
@@ -49,17 +59,14 @@ function Settings(props) {
             />
           </div>
           <div className="grid w-full items-center gap-2">
-            <Label
-              htmlFor="chatGptLabel"
-              className="text-left text-sm font-medium"
-            >
+            <Label htmlFor="chatGptLabel" className="text-left text-sm font-medium">
               Custom Name <small className="opacity-40">(default: blank)</small>
             </Label>
             <Input
               id="chatGptLabel"
               disabled={readonly}
               value={chatGptLabel || ''}
-              onChange={e => setChatGptLabel(e.target.value || null)}
+              onChange={(e) => setChatGptLabel(e.target.value || null)}
               placeholder="Set a custom name for ChatGPT"
               className={cn(
                 defaultTextProps,
@@ -68,17 +75,14 @@ function Settings(props) {
             />
           </div>
           <div className="grid w-full items-center gap-2">
-            <Label
-              htmlFor="promptPrefix"
-              className="text-left text-sm font-medium"
-            >
+            <Label htmlFor="promptPrefix" className="text-left text-sm font-medium">
               Prompt Prefix <small className="opacity-40">(default: blank)</small>
             </Label>
             <TextareaAutosize
               id="promptPrefix"
               disabled={readonly}
               value={promptPrefix || ''}
-              onChange={e => setPromptPrefix(e.target.value || null)}
+              onChange={(e) => setPromptPrefix(e.target.value || null)}
               placeholder="Set custom instructions. Defaults to: 'You are ChatGPT, a large language model trained by OpenAI.'"
               className={cn(
                 defaultTextProps,
@@ -91,17 +95,14 @@ function Settings(props) {
           <HoverCard openDelay={300}>
             <HoverCardTrigger className="grid w-full items-center gap-2">
               <div className="flex justify-between">
-                <Label
-                  htmlFor="temp-int"
-                  className="text-left text-sm font-medium"
-                >
+                <Label htmlFor="temp-int" className="text-left text-sm font-medium">
                   Temperature <small className="opacity-40">(default: 1)</small>
                 </Label>
                 <InputNumber
                   id="temp-int"
                   disabled={readonly}
                   value={temperature}
-                  onChange={value => setTemperature(value)}
+                  onChange={(value) => setTemperature(value)}
                   max={2}
                   min={0}
                   step={0.01}
@@ -118,7 +119,7 @@ function Settings(props) {
               <Slider
                 disabled={readonly}
                 value={[temperature]}
-                onValueChange={value => setTemperature(value[0])}
+                onValueChange={(value) => setTemperature(value[0])}
                 doubleClickHandler={() => setTemperature(1)}
                 max={2}
                 min={0}
@@ -126,25 +127,19 @@ function Settings(props) {
                 className="flex h-4 w-full"
               />
             </HoverCardTrigger>
-            <OptionHover
-              type="temp"
-              side="left"
-            />
+            <OptionHover type="temp" side="left" />
           </HoverCard>
           <HoverCard openDelay={300}>
             <HoverCardTrigger className="grid w-full items-center gap-2">
               <div className="flex justify-between">
-                <Label
-                  htmlFor="top-p-int"
-                  className="text-left text-sm font-medium"
-                >
+                <Label htmlFor="top-p-int" className="text-left text-sm font-medium">
                   Top P <small className="opacity-40">(default: 1)</small>
                 </Label>
                 <InputNumber
                   id="top-p-int"
                   disabled={readonly}
                   value={topP}
-                  onChange={value => setTopP(value)}
+                  onChange={(value) => setTopP(value)}
                   max={1}
                   min={0}
                   step={0.01}
@@ -161,7 +156,7 @@ function Settings(props) {
               <Slider
                 disabled={readonly}
                 value={[topP]}
-                onValueChange={value => setTopP(value[0])}
+                onValueChange={(value) => setTopP(value[0])}
                 doubleClickHandler={() => setTopP(1)}
                 max={1}
                 min={0}
@@ -169,26 +164,20 @@ function Settings(props) {
                 className="flex h-4 w-full"
               />
             </HoverCardTrigger>
-            <OptionHover
-              type="topp"
-              side="left"
-            />
+            <OptionHover type="topp" side="left" />
           </HoverCard>
 
           <HoverCard openDelay={300}>
             <HoverCardTrigger className="grid w-full items-center gap-2">
               <div className="flex justify-between">
-                <Label
-                  htmlFor="freq-penalty-int"
-                  className="text-left text-sm font-medium"
-                >
+                <Label htmlFor="freq-penalty-int" className="text-left text-sm font-medium">
                   Frequency Penalty <small className="opacity-40">(default: 0)</small>
                 </Label>
                 <InputNumber
                   id="freq-penalty-int"
                   disabled={readonly}
                   value={freqP}
-                  onChange={value => setFreqP(value)}
+                  onChange={(value) => setFreqP(value)}
                   max={2}
                   min={-2}
                   step={0.01}
@@ -205,7 +194,7 @@ function Settings(props) {
               <Slider
                 disabled={readonly}
                 value={[freqP]}
-                onValueChange={value => setFreqP(value[0])}
+                onValueChange={(value) => setFreqP(value[0])}
                 doubleClickHandler={() => setFreqP(0)}
                 max={2}
                 min={-2}
@@ -213,26 +202,20 @@ function Settings(props) {
                 className="flex h-4 w-full"
               />
             </HoverCardTrigger>
-            <OptionHover
-              type="freq"
-              side="left"
-            />
+            <OptionHover type="freq" side="left" />
           </HoverCard>
 
           <HoverCard openDelay={300}>
             <HoverCardTrigger className="grid w-full items-center gap-2">
               <div className="flex justify-between">
-                <Label
-                  htmlFor="pres-penalty-int"
-                  className="text-left text-sm font-medium"
-                >
+                <Label htmlFor="pres-penalty-int" className="text-left text-sm font-medium">
                   Presence Penalty <small className="opacity-40">(default: 0)</small>
                 </Label>
                 <InputNumber
                   id="pres-penalty-int"
                   disabled={readonly}
                   value={presP}
-                  onChange={value => setPresP(value)}
+                  onChange={(value) => setPresP(value)}
                   max={2}
                   min={-2}
                   step={0.01}
@@ -249,7 +232,7 @@ function Settings(props) {
               <Slider
                 disabled={readonly}
                 value={[presP]}
-                onValueChange={value => setPresP(value[0])}
+                onValueChange={(value) => setPresP(value[0])}
                 doubleClickHandler={() => setPresP(0)}
                 max={2}
                 min={-2}
@@ -257,10 +240,7 @@ function Settings(props) {
                 className="flex h-4 w-full"
               />
             </HoverCardTrigger>
-            <OptionHover
-              type="pres"
-              side="left"
-            />
+            <OptionHover type="pres" side="left" />
           </HoverCard>
         </div>
       </div>

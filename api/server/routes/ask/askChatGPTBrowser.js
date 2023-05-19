@@ -180,7 +180,11 @@ const ask = async ({
 
     // If response has parentMessageId, the fake userMessage.messageId should be updated to the real one.
     if (!overrideParentMessageId)
-      await saveMessage({ ...userMessage, messageId: userMessageId, newMessageId: newUserMassageId });
+      await saveMessage({
+        ...userMessage,
+        messageId: userMessageId,
+        newMessageId: newUserMassageId
+      });
     userMessageId = newUserMassageId;
 
     sendMessage(res, {

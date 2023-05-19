@@ -4,7 +4,6 @@ const sendEmail = require('../../utils/sendEmail');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const DebugControl = require('../../utils/debug.js');
-const Joi = require('joi');
 const { registerSchema } = require('../../strategies/validators');
 const migrateDataToFirstUser = require('../../utils/migrateDataToFirstUser');
 
@@ -25,29 +24,26 @@ const loginUser = async (user) => {
 };
 
 const logoutUser = async (user, refreshToken) => {
-  User.findById(user._id).then((user) => {
-    const tokenIndex = user.refreshToken.findIndex(item => item.refreshToken === refreshToken);
+  try {
+    const userFound = await User.findById(user._id);
+    const tokenIndex = userFound.refreshToken.findIndex((item) => item.refreshToken === refreshToken);
 
     if (tokenIndex !== -1) {
-      user.refreshToken.id(user.refreshToken[tokenIndex]._id).remove();
+      userFound.refreshToken.id(userFound.refreshToken[tokenIndex]._id).remove();
     }
 
-    user.save((err) => {
-      if (err) {
-        return { status: 500, message: err.message };
-      } else {
-        //res.clearCookie('refreshToken', COOKIE_OPTIONS);
-        // removeTokenCookie(res);
-        return { status: 200, message: 'Logout successful' };
-      }
-    });
-  });
-  return { status: 200, message: 'Logout successful' };
-};
+    await userFound.save();
+    //res.clearCookie('refreshToken', COOKIE_OPTIONS);
+    // removeTokenCookie(res);
+    return { status: 200, message: 'Logout successful' };
+  } catch (err) {
+    return { status: 500, message: err.message };
+  }
+}
 
 const registerUser = async (user) => {
   let response = {};
-  const { error } = Joi.validate(user, registerSchema);
+  const { error } = registerSchema.validate(user);
   if (error) {
     log({
       title: 'Route: register - Joi Validation Error',
@@ -78,7 +74,7 @@ const registerUser = async (user) => {
     }
 
     //determine if this is the first registered user (not counting anonymous_user)
-    const isFirstRegisteredUser = await User.countDocuments({}) === 0;
+    const isFirstRegisteredUser = (await User.countDocuments({})) === 0;
 
     try {
       const newUser = await new User({
@@ -88,7 +84,7 @@ const registerUser = async (user) => {
         username,
         name,
         avatar: null,
-        role: isFirstRegisteredUser ? 'ADMIN' : 'USER',
+        role: isFirstRegisteredUser ? 'ADMIN' : 'USER'
       });
 
       // todo: implement refresh token
@@ -104,7 +100,7 @@ const registerUser = async (user) => {
           newUser.save();
         });
       });
-      console.log('newUser', newUser)
+      console.log('newUser', newUser);
       if (isFirstRegisteredUser) {
         migrateDataToFirstUser(newUser);
         // console.log(migrate);
@@ -186,12 +182,11 @@ const resetPassword = async (userId, token, password) => {
   return { message: 'Password reset was successful' };
 };
 
-
 module.exports = {
   // signup,
   registerUser,
   loginUser,
   logoutUser,
   requestPasswordReset,
-  resetPassword,
+  resetPassword
 };
