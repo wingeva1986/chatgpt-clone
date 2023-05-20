@@ -67,10 +67,10 @@ const askClient = async ({
     abortController,
     ...(parentMessageId && conversationId ? { parentMessageId, conversationId } : {})
   };
-
-  const enc = encoding_for_model(model);
-  const text_tokens = enc.encode(text);
-  const prompt_tokens = enc.encode(promptText);
+  const isOffialModel = model=="gpt-3.5-turbo"||model=="gpt-4";
+  const enc = isOffialModel?encoding_for_model(model):null;
+  const text_tokens = isOffialModel?enc.encode(text):"";
+  const prompt_tokens = isOffialModel?enc.encode(promptText):"";
   // console.log("Prompt tokens = ", prompt_tokens.length);
   // console.log("Message Tokens = ", text_tokens.length);
 
