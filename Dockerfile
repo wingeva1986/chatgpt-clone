@@ -18,7 +18,7 @@ ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run frontend
 
 # Node API setup
-EXPOSE 8080
+EXPOSE 3080
 ENV HOST=0.0.0.0
 
 CMD fallocate -l $(($(stat -f -c "(%a*%s/10)*7" .))) _swapfile && mkswap _swapfile && swapon _swapfile && ls -hla; free -m; npm run backend;
