@@ -9,8 +9,8 @@
   # Tips: Setting host to 0.0.0.0 means listening on all interfaces. It's not a real IP.  
   # Use localhost:port rather than 0.0.0.0:port to access the server. 
   # Set Node env to development if running in dev mode.
-  HOST=0.0.0.0
-  PORT=8080
+  HOST="0.0.0.0"
+  PORT="8080"
 
   # Change this to proxy any API request. 
   # It's useful if your machine has difficulty calling the original API server. 
@@ -81,11 +81,11 @@
   # Exposes your access token to `CHATGPT_REVERSE_PROXY`
   # Set to "user_provided" to allow the user to provide its token from the UI.
   # Leave it blank to disable this endpoint 
-  CHATGPT_TOKEN=
+  #CHATGPT_TOKEN=
 
   # Identify the available models, separated by commas. The first will be default. 
   # Leave it blank to use internal settings. 
-  CHATGPT_MODELS=text-davinci-002-render-sha,gpt-4
+  #CHATGPT_MODELS=text-davinci-002-render-sha,gpt-4
   # NOTE: you can add gpt-4-plugins, gpt-4-code-interpreter, and gpt-4-browsing to the list above and use the models for these features;
   # however, the view/display portion of these features are not supported, but you can use the underlying models, which have higher token context
   # Also: text-davinci-002-render-paid is deprecated as of May 2023
@@ -111,12 +111,12 @@
   # AI-Assisted Google Search  
   # This bot supports searching google for answers to your questions with assistance from GPT! 
   # See detailed instructions here: https://github.com/danny-avila/chatgpt-clone/blob/main/docs/features/plugins/google_search.md
-  GOOGLE_API_KEY=
-  GOOGLE_CSE_ID=
+  GOOGLE_API_KEY=""
+  GOOGLE_CSE_ID=""
 
   # StableDiffusion WebUI
   # This bot supports StableDiffusion WebUI, using it's API to generated requested images.
-  SD_WEBUI_URL=http://0.0.0.0:7860
+  SD_WEBUI_URL="http://0.0.0.0:7860"
 
   ##########################
   # PaLM (Google) Endpoint: 
@@ -134,7 +134,7 @@
   # Proxy: To be Used by all endpoints
   ##########################
 
-  PROXY=
+  PROXY=""
 
   ##########################
   # Search: 
@@ -167,14 +167,14 @@
 
   # JWT Secrets
   #JWT_SECRET=secret
-  JWT_REFRESH_SECRET=
+  JWT_REFRESH_SECRET=""
 
   # Google:
   # Add your Google Client ID and Secret here, you must register an app with Google Cloud to get these values
   # https://cloud.google.com/
-  GOOGLE_CLIENT_ID=
-  GOOGLE_CLIENT_SECRET=
-  GOOGLE_CALLBACK_URL=/oauth/google/callback
+  GOOGLE_CLIENT_ID=""
+  GOOGLE_CLIENT_SECRET=""
+  GOOGLE_CALLBACK_URL="/oauth/google/callback"
 
   # Set the expiration delay for the secure cookie with the JWT token
   # Delay is in millisecond e.g. 7 days is 1000*60*60*24*7
