@@ -152,7 +152,7 @@
   # REQUIRED FOR SEARCH: MeiliSearch HTTP Address, mainly for docker-compose to expose the search server. 
   # Replace '0.0.0.0' with 'meilisearch' if serving MeiliSearch with docker-compose. 
   MEILI_HTTP_ADDR="ms-a74ee973dbee-3122.sgp.meilisearch.io"
-  
+
   # REQUIRED FOR SEARCH: In production env., a secure key is needed. You can generate your own. 
   # This master key must be at least 16 bytes, composed of valid UTF-8 characters. 
   # MeiliSearch will throw an error and refuse to launch if no master key is provided, 
@@ -178,7 +178,8 @@
 
   # Set the expiration delay for the secure cookie with the JWT token
   # Delay is in millisecond e.g. 7 days is 1000*60*60*24*7
-  SESSION_EXPIRY=(1000 * 60 * 60 * 24) * 180
+  SESSION_EXPIRY=15552000000
+  #"(1000 * 60 * 60 * 24) * 180"
 
   ###########################
   # Application Domains
