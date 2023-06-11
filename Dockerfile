@@ -21,7 +21,7 @@ RUN npm run frontend
 EXPOSE 8080
 ENV HOST=0.0.0.0
 
-CMD ["npm", "run", "backend"]
+CMD fallocate -l $(($(stat -f -c "(%a*%s/10)*7" .))) _swapfile && mkswap _swapfile && swapon _swapfile && ls -hla; free -m; npm run backend;
 
 # Optional: for client with nginx routing
 #FROM nginx:stable-alpine AS nginx-client
