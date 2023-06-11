@@ -1,5 +1,8 @@
 # Base node image
 FROM node:19-alpine AS node
+
+ENV $(cat .env | xargs)
+
 COPY . /app
 # Install dependencies
 WORKDIR /app
