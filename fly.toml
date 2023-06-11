@@ -89,7 +89,7 @@
   # Exposes your access token to `CHATGPT_REVERSE_PROXY`
   # Set to "user_provided" to allow the user to provide its token from the UI.
   # Leave it blank to disable this endpoint 
-  #CHATGPT_TOKEN=
+  CHATGPT_TOKEN=""
 
   # Identify the available models, separated by commas. The first will be default. 
   # Leave it blank to use internal settings. 
@@ -119,8 +119,8 @@
   # AI-Assisted Google Search  
   # This bot supports searching google for answers to your questions with assistance from GPT! 
   # See detailed instructions here: https://github.com/danny-avila/chatgpt-clone/blob/main/docs/features/plugins/google_search.md
-  GOOGLE_API_KEY=""
-  GOOGLE_CSE_ID=""
+  #GOOGLE_API_KEY=
+  GOOGLE_CSE_ID="628a17e16ed6c4805"
 
   # StableDiffusion WebUI
   # This bot supports StableDiffusion WebUI, using it's API to generated requested images.
