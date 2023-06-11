@@ -152,7 +152,7 @@
   # REQUIRED FOR SEARCH: MeiliSearch HTTP Address, mainly for docker-compose to expose the search server. 
   # Replace '0.0.0.0' with 'meilisearch' if serving MeiliSearch with docker-compose. 
   MEILI_HTTP_ADDR="ms-a74ee973dbee-3122.sgp.meilisearch.io"
-  "
+  
   # REQUIRED FOR SEARCH: In production env., a secure key is needed. You can generate your own. 
   # This master key must be at least 16 bytes, composed of valid UTF-8 characters. 
   # MeiliSearch will throw an error and refuse to launch if no master key is provided, 
