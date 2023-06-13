@@ -43,10 +43,8 @@
 
   # Reverse proxy settings for OpenAI: 
   # https://github.com/waylaidwanderer/node-chatgpt-api#using-a-reverse-proxy 
-  # OPENAI_REVERSE_PROXY=
+  OPENAI_REVERSE_PROXY="https://chimeragpt.adventblocks.cc/v1/chat/completions/"
 
-  CHIMERA_OPENAI_REVERSE_PROXY="https://chimeragpt.adventblocks.cc/v1/chat/completions/"
-  
   ##########################
   # AZURE Endpoint:   
   ##########################
