@@ -17,6 +17,7 @@
   # Tips: Setting host to 0.0.0.0 means listening on all interfaces. It's not a real IP.  
   # Use localhost:port rather than 0.0.0.0:port to access the server. 
   # Set Node env to development if running in dev mode.
+  APP_TITLE="LibreChat"
   HOST="0.0.0.0"
   PORT="3080"
 
@@ -178,6 +179,8 @@
   # User System:
   ##########################
 
+  ALLOW_REGISTRATION=false
+
   # JWT Secrets
   #JWT_SECRET=secret
   JWT_REFRESH_SECRET=""
@@ -204,18 +207,3 @@
   #DOMAIN_CLIENT=http://localhost:3080
   #DOMAIN_SERVER=http://localhost:3080
 
-  ###########################
-  # Frontend Configuration (Vite):
-  ###########################
-
-  # Custom app name, this text will be displayed in the landing page and the footer.
-  VITE_APP_TITLE="LibreChat"
-
-  # Enable Social Login
-  # This enables/disables the Login with Google button on the login page.
-  # Set to true if you have registered the app with google cloud services 
-  # and have set the GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the /api/.env file
-  VITE_SHOW_GOOGLE_LOGIN_OPTION=false
-
-  # Allow Public Registration
-  ALLOW_REGISTRATION=false

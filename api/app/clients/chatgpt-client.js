@@ -63,18 +63,6 @@ const askClient = async ({
 
   let apiKey = oaiApiKey ? oaiApiKey : process.env.OPENAI_API_KEY || null;
 
-  if (!model.startsWith('gpt-3.5-turbo')) {
-    clientOptions.reverseProxyUrl = process.env.POE_OPENAI_REVERSE_PROXY;
-    //poe models
-    if (model=='gpt-4'){
-      clientOptions.maxContextTokens = 2100;
-    } else if (model=='gpt-Claude+'){
-      clientOptions.maxContextTokens = 11000;
-    } else if (model=='gpt-Claude-instant-100k'){
-      clientOptions.maxContextTokens = 100000;
-    }
-  }
-
   if (azure) {
     apiKey = oaiApiKey ? oaiApiKey : process.env.AZURE_OPENAI_API_KEY || null;
     clientOptions.reverseProxyUrl = genAzureChatCompletion({
