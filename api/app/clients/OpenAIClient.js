@@ -103,6 +103,9 @@ class OpenAIClient extends BaseClient {
 
     if (this.options.reverseProxyUrl) {
       this.completionsUrl = this.options.reverseProxyUrl;
+      if (!model.startsWith('gpt-3.5')||model.endsWith('-poe')) {
+        this.completionsUrl = process.env.POE_OPENAI_REVERSE_PROXY;
+      }      
     } else if (isChatGptModel) {
       this.completionsUrl = 'https://api.openai.com/v1/chat/completions';
     } else {
