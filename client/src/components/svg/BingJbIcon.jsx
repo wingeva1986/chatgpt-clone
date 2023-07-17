@@ -2,21 +2,9 @@ import React from 'react';
 
 export default function BingIcon() {
   return (
-    <svg
-      width={32}
-      height={32}
-      viewBox="0 0 32 32"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width={32} height={32} viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient
-          id="a"
-          x1={22}
-          x2={22}
-          y1={2}
-          y2={38}
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="a" x1={22} x2={22} y1={2} y2={38} gradientUnits="userSpaceOnUse">
           <stop stopColor="#F9F9F9" />
           <stop
             offset={1}
