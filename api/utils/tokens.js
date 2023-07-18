@@ -35,6 +35,8 @@ const models = [
   'gpt-4-32k-0314',
   'gpt-3.5-turbo',
   'gpt-3.5-turbo-0301',
+  'gpt-3.5-turbo-16k-poe',
+  'gpt-claude-2-100k',
 ];
 
 const maxTokensMap = {
@@ -46,6 +48,8 @@ const maxTokensMap = {
   'gpt-3.5-turbo-0613': 4095,
   'gpt-3.5-turbo-0301': 4095,
   'gpt-3.5-turbo-16k': 15999,
+  'gpt-3.5-turbo-16k-poe': 15999,
+  'gpt-claude-2-100k': 99999
 };
 
 module.exports = { tiktokenModels: new Set(models), maxTokensMap };
