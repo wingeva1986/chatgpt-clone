@@ -69,6 +69,9 @@ export default {
   com_auth_click: 'Click',
   com_auth_here: 'HERE',
   com_auth_to_reset_your_password: 'to reset your password.',
+  com_auth_reset_password_link_sent: 'Email Sent',
+  com_auth_reset_password_email_sent:
+    'An email has been sent to you with further instructions to reset your password.',
   com_auth_error_reset_password:
     'There was a problem resetting your password. There was no user found with the email address provided. Please try again.',
   com_auth_reset_password_success: 'Password Reset Success',
@@ -183,4 +186,10 @@ export default {
   com_nav_settings: 'Settings',
   com_nav_search_placeholder: 'Search messages',
   com_nav_setting_general: 'General',
+  com_nav_language: 'Language',
+  com_nav_lang_english: 'English',
+  com_nav_lang_chinese: '中文',
+  com_nav_lang_italian: 'Italiano',
+  com_nav_lang_brazilian_portuguese: 'Português Brasileiro',
+  com_nav_lang_spanish: 'Español',
 };
