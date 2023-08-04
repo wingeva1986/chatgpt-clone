@@ -139,7 +139,7 @@
   # Follow the instruction here to setup:
   # https://github.com/danny-avila/LibreChat/blob/main/docs/install/apis_and_tokens.md
 
-  PALM_KEY=""
+  #PALM_KEY="user_provided"
 
   # In case you need a reverse proxy for this endpoint:
   # GOOGLE_REVERSE_PROXY= 
