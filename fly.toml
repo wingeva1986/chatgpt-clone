@@ -74,7 +74,7 @@
   #If this fails, follow these instructions https://github.com/danny-avila/LibreChat/issues/370#issuecomment-1560382302 to provide the full cookie strings.
   # Set to "user_provided" to allow the user to provide its token from the UI.
   # Leave it blank to disable this endpoint. 
-  BINGAI_TOKEN="_U=1Rg7g4B5rEH_NSW86Bj2GAGYZeL5x9N4Y6NtRn55TShkJkLfRmDm7lGA15-XrL-OKL8biF1anpAH0Wk8ELxMCAlfQ5ybMvYtHyIRfo61OiEYOflqgRI2DUq591X3ExKKqPCeCf9yxjLY-G9v1SbS3Zwx4R2N5s6V67nHd7s4wZvH21uvloEmps-9ckYJN2VHcHsp5cil8pX_Fd-hhLwwlfA"
+  BINGAI_TOKEN="user_provided"
   # BingAI Host: 
   # Necessary for some people in different countries, e.g. China (https://cn.bing.com) 
   # Leave it blank to use default server. 
