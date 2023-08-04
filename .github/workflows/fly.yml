@@ -15,7 +15,7 @@ jobs:
         - uses: actions/checkout@v2
         - uses: superfly/flyctl-actions/setup-flyctl@master
         - run: |
-            flyctl secrets set GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }} CREDS_KEY=${{ secrets.CREDS_KEY }} CREDS_IV=${{ secrets.CREDS_IV }} DOMAIN_CLIENT=${{ secrets.DOMAIN_CLIENT }} DOMAIN_SERVER=${{ secrets.DOMAIN_SERVER }}  JWT_SECRET=${{ secrets.JWT_SECRET_PROD }}  POE_OPENAI_REVERSE_PROXY=${{ secrets.POE_OPENAI_REVERSE_PROXY }} POE_OPENAI_REVERSE_PROXY=${{ secrets.POE_OPENAI_REVERSE_PROXY }} BINGAI_TOKEN=`${{ secrets.BINGAI_TOKEN }}`  OPENAI_API_KEY=${{ secrets.OPENAI_KEY }}  MEILI_MASTER_KEY=${{ secrets.MEILI_MASTER_KEY }}  MONGO_URI=${{ secrets.MONGO_URI }} -a ${{ secrets.FLY_APP }}
+            flyctl secrets set GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }} CREDS_KEY=${{ secrets.CREDS_KEY }} CREDS_IV=${{ secrets.CREDS_IV }} DOMAIN_CLIENT=${{ secrets.DOMAIN_CLIENT }} DOMAIN_SERVER=${{ secrets.DOMAIN_SERVER }}  JWT_SECRET=${{ secrets.JWT_SECRET_PROD }}  POE_OPENAI_REVERSE_PROXY=${{ secrets.POE_OPENAI_REVERSE_PROXY }} POE_OPENAI_REVERSE_PROXY=${{ secrets.POE_OPENAI_REVERSE_PROXY }} BINGAI_TOKEN="${{ secrets.BINGAI_TOKEN }}"  OPENAI_API_KEY=${{ secrets.OPENAI_KEY }}  MEILI_MASTER_KEY=${{ secrets.MEILI_MASTER_KEY }}  MONGO_URI=${{ secrets.MONGO_URI }} -a ${{ secrets.FLY_APP }}
             flyctl deploy -a ${{ secrets.FLY_APP }}           
           env:
             FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
