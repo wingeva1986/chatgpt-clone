@@ -74,7 +74,7 @@
   #If this fails, follow these instructions https://github.com/danny-avila/LibreChat/issues/370#issuecomment-1560382302 to provide the full cookie strings.
   # Set to "user_provided" to allow the user to provide its token from the UI.
   # Leave it blank to disable this endpoint. 
-  BINGAI_TOKEN="user_provided"
+  #BINGAI_TOKEN="user_provided"
 
   # BingAI Host: 
   # Necessary for some people in different countries, e.g. China (https://cn.bing.com) 
@@ -139,7 +139,7 @@
   # Follow the instruction here to setup:
   # https://github.com/danny-avila/LibreChat/blob/main/docs/install/apis_and_tokens.md
 
-  PALM_KEY="user_provided"
+  PALM_KEY=""
 
   # In case you need a reverse proxy for this endpoint:
   # GOOGLE_REVERSE_PROXY= 
