@@ -160,11 +160,11 @@
 
   # REQUIRED FOR SEARCH: MeiliSearch Host, mainly for the API server to connect to the search server. 
   # Replace '0.0.0.0' with 'meilisearch' if serving MeiliSearch with docker-compose. 
-  MEILI_HOST="https://ms-a74ee973dbee-3122.sgp.meilisearch.io"
+  #MEILI_HOST="https://ms-a74ee973dbee-3122.sgp.meilisearch.io"
 
   # REQUIRED FOR SEARCH: MeiliSearch HTTP Address, mainly for docker-compose to expose the search server. 
   # Replace '0.0.0.0' with 'meilisearch' if serving MeiliSearch with docker-compose. 
-  MEILI_HTTP_ADDR="ms-a74ee973dbee-3122.sgp.meilisearch.io"
+  #MEILI_HTTP_ADDR="ms-a74ee973dbee-3122.sgp.meilisearch.io"
 
   # REQUIRED FOR SEARCH: In production env., a secure key is needed. You can generate your own. 
   # This master key must be at least 16 bytes, composed of valid UTF-8 characters. 
