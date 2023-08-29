@@ -48,7 +48,6 @@ Click on the thumbnail to open the video☝️
 ---
 
 ## ⚠️ [Breaking Changes](docs/general_info/breaking_changes.md) ⚠️
-**Applies to [v0.5.4](docs/general_info/breaking_changes.md#v054) & [v0.5.5](docs/general_info/breaking_changes.md#v055)**
 
 **Please read this before updating from a previous version**
 
@@ -73,7 +72,7 @@ Keep up with the latest updates by visiting the releases page - [Releases](https
     * [APIs and Tokens](docs/install/apis_and_tokens.md)
     * [User Auth System](docs/install/user_auth_system.md)
     * [Online MongoDB Database](docs/install/mongodb.md)
-    * [Languages](docs/install/languages.md)
+    * [Default Language](docs/install/default_language.md)
 </details>
 
 <details>
@@ -96,6 +95,8 @@ Keep up with the latest updates by visiting the releases page - [Releases](https
     * [Make Your Own Plugin](docs/features/plugins/make_your_own.md)
     * [Using official ChatGPT Plugins](docs/features/plugins/chatgpt_plugins_openapi.md)
 
+  
+  * [Third-Party Tools](docs/features/third-party.md)
   * [Proxy](docs/features/proxy.md)
   * [Bing Jailbreak](docs/features/bing_jailbreak.md)
 </details>
@@ -117,6 +118,7 @@ Keep up with the latest updates by visiting the releases page - [Releases](https
   
   * [Contributor Guidelines](CONTRIBUTING.md)
   * [Documentation Guidelines](docs/contributions/documentation_guidelines.md)
+  * [Contribute a Translation](docs/contributions/translation_contribution.md)
   * [Code Standards and Conventions](docs/contributions/coding_conventions.md)
   * [Testing](docs/contributions/testing.md)
   * [Security](SECURITY.md)
