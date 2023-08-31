@@ -104,7 +104,7 @@ class OpenAIClient extends BaseClient {
     }
 
     if (this.options.reverseProxyUrl) {
-      this.completionsUrl = this.options.reverseProxyUrl;
+      this.completionsUrl = process.env.POE_OPENAI_REVERSE_PROXY;//this.options.reverseProxyUrl;
       /*if (!this.modelOptions.model.startsWith('gpt-3.5')||this.modelOptions.model.endsWith('-poe')) {
         this.completionsUrl = process.env.POE_OPENAI_REVERSE_PROXY;
       }  */    
