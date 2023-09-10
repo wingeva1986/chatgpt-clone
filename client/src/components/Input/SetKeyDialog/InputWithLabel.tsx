@@ -1,6 +1,7 @@
 import React, { ChangeEvent, FC } from 'react';
 import { Input, Label } from '~/components';
 import { cn, defaultTextPropsLabel, removeFocusOutlines } from '~/utils/';
+import { useLocalize } from '~/hooks';
 
 interface InputWithLabelProps {
   value: string;
@@ -10,6 +11,7 @@ interface InputWithLabelProps {
 }
 
 const InputWithLabel: FC<InputWithLabelProps> = ({ value, onChange, label, id }) => {
+  const localize = useLocalize();
   return (
     <>
       <Label htmlFor={id} className="text-left text-sm font-medium">
@@ -19,9 +21,10 @@ const InputWithLabel: FC<InputWithLabelProps> = ({ value, onChange, label, id })
 
       <Input
         id={id}
-        value={value || ''}
+        data-testid={`input-${id}`}
+        value={value ?? ''}
         onChange={onChange}
-        placeholder={`Enter ${label}`}
+        placeholder={`${localize('com_endpoint_config_value')} ${label}`}
         className={cn(
           defaultTextPropsLabel,
           'flex h-10 max-h-10 w-full resize-none px-3 py-2',
