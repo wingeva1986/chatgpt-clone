@@ -182,7 +182,7 @@ primary_region = "hkg"
 
   # JWT Secrets
   #JWT_SECRET=secret
-  JWT_REFRESH_SECRET=""
+  JWT_REFRESH_SECRET="flykey@2023"
 
   # Google:
   # Add your Google Client ID and Secret here, you must register an app with Google Cloud to get these values
