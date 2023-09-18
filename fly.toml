@@ -44,7 +44,7 @@ primary_region = "hkg"
 
   # Reverse proxy settings for OpenAI: 
   # https://github.com/waylaidwanderer/node-chatgpt-api#using-a-reverse-proxy 
-  #OPENAI_REVERSE_PROXY="https://freeapi.aivvm.com/v1/chat/completions/"
+  OPENAI_REVERSE_PROXY="https://poebr.fly.dev/v2/driver/sage/v1/chat/completions"#"https://freeapi.aivvm.com/v1/chat/completions/"
 
   ##########################
   # AZURE Endpoint:   
