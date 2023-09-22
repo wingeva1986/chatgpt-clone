@@ -1,4 +1,4 @@
-name: destroy and reDeploy app
+name: reDeploy app
 
 on:
   workflow_dispatch:
