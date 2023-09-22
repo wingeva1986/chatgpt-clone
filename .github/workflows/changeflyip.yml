@@ -1,4 +1,4 @@
-name: Fly Deploy
+name: destroy and reDeploy app
 
 on:
   workflow_dispatch:
