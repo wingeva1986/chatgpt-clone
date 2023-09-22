@@ -2,6 +2,7 @@ const BaseClient = require('./BaseClient');
 const ChatGPTClient = require('./ChatGPTClient');
 const { encoding_for_model: encodingForModel, get_encoding: getEncoding } = require('tiktoken');
 const { maxTokensMap, genAzureChatCompletion } = require('../../utils');
+const { truncateText } = require('./prompts');
 const { runTitleChain } = require('./chains');
 const { createLLM } = require('./llm');
 
@@ -59,9 +60,21 @@ class OpenAIClient extends BaseClient {
           typeof modelOptions.presence_penalty === 'undefined' ? 1 : modelOptions.presence_penalty,
         stop: modelOptions.stop,
       };
+    } else {
+      // Update the modelOptions if it already exists
+      this.modelOptions = {
+        ...this.modelOptions,
+        ...modelOptions,
+      };
+    }
+
+    if (process.env.OPENROUTER_API_KEY) {
+      this.apiKey = process.env.OPENROUTER_API_KEY;
+      this.useOpenRouter = true;
     }
 
     this.isChatCompletion =
+      this.useOpenRouter ||
       this.options.reverseProxyUrl ||
       this.options.localAI ||
       this.modelOptions.model.startsWith('gpt-');
@@ -117,6 +130,10 @@ class OpenAIClient extends BaseClient {
 
     if (this.azureEndpoint && this.options.debug) {
       console.debug('Using Azure endpoint');
+    }
+
+    if (this.useOpenRouter) {
+      this.completionsUrl = 'https://openrouter.ai/api/v1/chat/completions';
     }
 
     return this;
@@ -324,12 +341,24 @@ class OpenAIClient extends BaseClient {
             return;
           }
 
+          if (this.options.debug) {
+            // console.debug('progressMessage');
+            // console.dir(progressMessage, { depth: null });
+          }
+
           if (progressMessage.choices) {
             streamResult = progressMessage;
           }
-          const token = this.isChatCompletion
-            ? progressMessage.choices?.[0]?.delta?.content
-            : progressMessage.choices?.[0]?.text;
+
+          let token = null;
+          if (this.isChatCompletion) {
+            token =
+              progressMessage.choices?.[0]?.delta?.content ?? progressMessage.choices?.[0]?.text;
+          }
+
+          if (!token && this.useOpenRouter) {
+            token = progressMessage.choices?.[0]?.message?.content;
+          }
           // first event's delta content is always undefined
           if (!token) {
             return;
@@ -378,12 +407,14 @@ class OpenAIClient extends BaseClient {
   async titleConvo({ text, responseText = '' }) {
     let title = 'New Chat';
     const convo = `||>User:
-"${text}"
+"${truncateText(text)}"
 ||>Response:
-"${JSON.stringify(responseText)}"`;
+"${JSON.stringify(truncateText(responseText))}"`;
+
+    const { OPENAI_TITLE_MODEL } = process.env ?? {};
 
     const modelOptions = {
-      model: 'gpt-3.5-turbo-0613',
+      model: OPENAI_TITLE_MODEL ?? 'gpt-3.5-turbo-0613',
       temperature: 0.2,
       presence_penalty: 0,
       frequency_penalty: 0,
@@ -394,6 +425,16 @@ class OpenAIClient extends BaseClient {
 
     if (this.langchainProxy) {
       configOptions.basePath = this.langchainProxy;
+    }
+
+    if (this.useOpenRouter) {
+      configOptions.basePath = 'https://openrouter.ai/api/v1';
+      configOptions.baseOptions = {
+        headers: {
+          'HTTP-Referer': 'https://librechat.ai',
+          'X-Title': 'LibreChat',
+        },
+      };
     }
 
     try {
@@ -408,7 +449,7 @@ class OpenAIClient extends BaseClient {
     } catch (e) {
       console.error(e.message);
       console.log('There was an issue generating title with LangChain, trying the old method...');
-      modelOptions.model = 'gpt-3.5-turbo';
+      modelOptions.model = OPENAI_TITLE_MODEL ?? 'gpt-3.5-turbo';
       const instructionsPayload = [
         {
           role: 'system',
