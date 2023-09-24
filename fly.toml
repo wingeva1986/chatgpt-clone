@@ -42,6 +42,16 @@ primary_region = "hkg"
   # Leave it blank to use internal settings. 
   OPENAI_MODELS="gpt-3.5-turbo,gpt-4,gpt-claude-2-100k,gpt-google,gpt-3.5-turbo-16k,gpt-4-32k"
 
+  # Titling is enabled by default when initiating a conversation.
+  # Uncomment the following variable to disable this feature.
+  # TITLE_CONVO=false
+  
+  # The model used for titling by default is gpt-3.5-turbo-0613 to assure it works with the default method.
+  # gpt-3.5-turbo should also work when using the official API (and not a reverse proxy).
+  # You can change the model used by uncommenting the following and setting it to the model you want
+  # Must be compatible with the OpenAI Endpoint.
+  OPENAI_TITLE_MODEL=gpt-3.5-turbo
+  
   # Reverse proxy settings for OpenAI: 
   # https://github.com/waylaidwanderer/node-chatgpt-api#using-a-reverse-proxy 
   OPENAI_REVERSE_PROXY="https://poebr.fly.dev/v2/driver/sage/v1/chat/completions"#"https://freeapi.aivvm.com/v1/chat/completions/"
