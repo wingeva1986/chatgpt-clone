@@ -120,7 +120,7 @@ primary_region = "hkg"
   # Identify the available models, separated by commas *without spaces*. 
   # The first will be default. 
   # Leave it blank to use internal settings. 
-  PLUGIN_MODELS="gpt-3.5-turbo,gpt-3.5-i,gpt-4,gpt-claude-2-100k"
+  PLUGIN_MODELS="gpt-3.5-i,gpt-3.5-turbo,gpt-4,gpt-claude-2-100k"
 
   # For securely storing credentials, you need a fixed key and IV. You can set them here for prod and dev environments
   # If you don't set them, the app will crash on startup.
