@@ -40,7 +40,7 @@ primary_region = "hkg"
   # Identify the available models, separated by commas *without spaces*. 
   # The first will be default. 
   # Leave it blank to use internal settings. 
-  OPENAI_MODELS="gpt-3.5-turbo,gpt-3.5-i,gpt-web,gpt-perplexity,gpt-claude-2-100k,gpt-google,stablediffusionxl,gpt-3.5-turbo-16k,gpt-4,gpt-4-32k"
+  OPENAI_MODELS="gpt-3.5-turbo,gpt-3.5-i,gpt-web,gpt-claude-2-100k,gpt-perplexity,perplexity-web,perplexity-scholar,perplexity-youtube,gpt-google,stablediffusionxl,gpt-3.5-turbo-16k,gpt-4,gpt-4-32k"
 
   # Titling is enabled by default when initiating a conversation.
   # Uncomment the following variable to disable this feature.
