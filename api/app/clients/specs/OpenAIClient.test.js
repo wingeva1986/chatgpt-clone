@@ -1,7 +1,45 @@
 require('dotenv').config();
+const { fetchEventSource } = require('@waylaidwanderer/fetch-event-source');
+const { genAzureChatCompletion } = require('~/utils/azureUtils');
 const OpenAIClient = require('../OpenAIClient');
-
 jest.mock('meilisearch');
+
+jest.mock('~/lib/db/connectDb');
+jest.mock('~/models', () => ({
+  User: jest.fn(),
+  Key: jest.fn(),
+  Session: jest.fn(),
+  Balance: jest.fn(),
+  Transaction: jest.fn(),
+  getMessages: jest.fn().mockResolvedValue([]),
+  saveMessage: jest.fn(),
+  updateMessage: jest.fn(),
+  deleteMessagesSince: jest.fn(),
+  deleteMessages: jest.fn(),
+  getConvoTitle: jest.fn(),
+  getConvo: jest.fn(),
+  saveConvo: jest.fn(),
+  deleteConvos: jest.fn(),
+  getPreset: jest.fn(),
+  getPresets: jest.fn(),
+  savePreset: jest.fn(),
+  deletePresets: jest.fn(),
+  findFileById: jest.fn(),
+  createFile: jest.fn(),
+  updateFile: jest.fn(),
+  deleteFile: jest.fn(),
+  deleteFiles: jest.fn(),
+  getFiles: jest.fn(),
+  updateFileUsage: jest.fn(),
+}));
+
+jest.mock('langchain/chat_models/openai', () => {
+  return {
+    ChatOpenAI: jest.fn().mockImplementation(() => {
+      return {};
+    }),
+  };
+});
 
 describe('OpenAIClient', () => {
   let client, client2;
@@ -12,15 +50,31 @@ describe('OpenAIClient', () => {
     { role: 'assistant', sender: 'Assistant', text: 'Hi', messageId: '2' },
   ];
 
+  const defaultOptions = {
+    // debug: true,
+    openaiApiKey: 'new-api-key',
+    modelOptions: {
+      model,
+      temperature: 0.7,
+    },
+  };
+
+  const defaultAzureOptions = {
+    azureOpenAIApiInstanceName: 'your-instance-name',
+    azureOpenAIApiDeploymentName: 'your-deployment-name',
+    azureOpenAIApiVersion: '2020-07-01-preview',
+  };
+
+  beforeAll(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    console.warn.mockRestore();
+  });
+
   beforeEach(() => {
-    const options = {
-      // debug: true,
-      openaiApiKey: 'new-api-key',
-      modelOptions: {
-        model,
-        temperature: 0.7,
-      },
-    };
+    const options = { ...defaultOptions };
     client = new OpenAIClient('test-api-key', options);
     client2 = new OpenAIClient('test-api-key', options);
     client.summarizeMessages = jest.fn().mockResolvedValue({
@@ -32,6 +86,7 @@ describe('OpenAIClient', () => {
       .fn()
       .mockResolvedValue({ prompt: messages.map((m) => m.text).join('\n') });
     client.constructor.freeAndResetAllEncoders();
+    client.getMessages = jest.fn().mockResolvedValue([]);
   });
 
   describe('setOptions', () => {
@@ -86,7 +141,97 @@ describe('OpenAIClient', () => {
 
       client.setOptions({ reverseProxyUrl: 'https://example.com/completions' });
       expect(client.completionsUrl).toBe('https://example.com/completions');
-      expect(client.langchainProxy).toBeUndefined();
+      expect(client.langchainProxy).toBe('https://example.com/completions');
+    });
+  });
+
+  describe('setOptions with Simplified Azure Integration', () => {
+    afterEach(() => {
+      delete process.env.AZURE_OPENAI_DEFAULT_MODEL;
+      delete process.env.AZURE_USE_MODEL_AS_DEPLOYMENT_NAME;
+    });
+
+    const azureOpenAIApiInstanceName = 'test-instance';
+    const azureOpenAIApiDeploymentName = 'test-deployment';
+    const azureOpenAIApiVersion = '2020-07-01-preview';
+
+    const createOptions = (model) => ({
+      modelOptions: { model },
+      azure: {
+        azureOpenAIApiInstanceName,
+        azureOpenAIApiDeploymentName,
+        azureOpenAIApiVersion,
+      },
+    });
+
+    it('should set model from AZURE_OPENAI_DEFAULT_MODEL when Azure is enabled', () => {
+      process.env.AZURE_OPENAI_DEFAULT_MODEL = 'gpt-4-azure';
+      const options = createOptions('test');
+      client.azure = options.azure;
+      client.setOptions(options);
+      expect(client.modelOptions.model).toBe('gpt-4-azure');
+    });
+
+    it('should not change model if Azure is not enabled', () => {
+      process.env.AZURE_OPENAI_DEFAULT_MODEL = 'gpt-4-azure';
+      const originalModel = 'test';
+      client.azure = false;
+      client.setOptions(createOptions('test'));
+      expect(client.modelOptions.model).toBe(originalModel);
+    });
+
+    it('should not change model if AZURE_OPENAI_DEFAULT_MODEL is not set and model is passed', () => {
+      const originalModel = 'GROK-LLM';
+      const options = createOptions(originalModel);
+      client.azure = options.azure;
+      client.setOptions(options);
+      expect(client.modelOptions.model).toBe(originalModel);
+    });
+
+    it('should change model if AZURE_OPENAI_DEFAULT_MODEL is set and model is passed', () => {
+      process.env.AZURE_OPENAI_DEFAULT_MODEL = 'gpt-4-azure';
+      const originalModel = 'GROK-LLM';
+      const options = createOptions(originalModel);
+      client.azure = options.azure;
+      client.setOptions(options);
+      expect(client.modelOptions.model).toBe(process.env.AZURE_OPENAI_DEFAULT_MODEL);
+    });
+
+    it('should include model in deployment name if AZURE_USE_MODEL_AS_DEPLOYMENT_NAME is set', () => {
+      process.env.AZURE_USE_MODEL_AS_DEPLOYMENT_NAME = 'true';
+      const model = 'gpt-4-azure';
+
+      const AzureClient = new OpenAIClient('test-api-key', createOptions(model));
+
+      const expectedValue = `https://${azureOpenAIApiInstanceName}.openai.azure.com/openai/deployments/${model}/chat/completions?api-version=${azureOpenAIApiVersion}`;
+
+      expect(AzureClient.modelOptions.model).toBe(model);
+      expect(AzureClient.azureEndpoint).toBe(expectedValue);
+    });
+
+    it('should include model in deployment name if AZURE_USE_MODEL_AS_DEPLOYMENT_NAME and default model is set', () => {
+      const defaultModel = 'gpt-4-azure';
+      process.env.AZURE_USE_MODEL_AS_DEPLOYMENT_NAME = 'true';
+      process.env.AZURE_OPENAI_DEFAULT_MODEL = defaultModel;
+      const model = 'gpt-4-this-is-a-test-model-name';
+
+      const AzureClient = new OpenAIClient('test-api-key', createOptions(model));
+
+      const expectedValue = `https://${azureOpenAIApiInstanceName}.openai.azure.com/openai/deployments/${model}/chat/completions?api-version=${azureOpenAIApiVersion}`;
+
+      expect(AzureClient.modelOptions.model).toBe(defaultModel);
+      expect(AzureClient.azureEndpoint).toBe(expectedValue);
+    });
+
+    it('should not include model in deployment name if AZURE_USE_MODEL_AS_DEPLOYMENT_NAME is not set', () => {
+      const model = 'gpt-4-azure';
+
+      const AzureClient = new OpenAIClient('test-api-key', createOptions(model));
+
+      const expectedValue = `https://${azureOpenAIApiInstanceName}.openai.azure.com/openai/deployments/${azureOpenAIApiDeploymentName}/chat/completions?api-version=${azureOpenAIApiVersion}`;
+
+      expect(AzureClient.modelOptions.model).toBe(model);
+      expect(AzureClient.azureEndpoint).toBe(expectedValue);
     });
   });
 
@@ -221,7 +366,7 @@ describe('OpenAIClient', () => {
         isChatCompletion: true,
       });
       const hasUserWithName = result.prompt.some(
-        (item) => item.role === 'user' && item.name === 'Test User',
+        (item) => item.role === 'user' && item.name === 'Test_User',
       );
       expect(hasUserWithName).toBe(true);
     });
@@ -308,6 +453,48 @@ describe('OpenAIClient', () => {
         }
         expect(totalTokens).toBe(testCase.expected);
       });
+    });
+  });
+
+  describe('sendMessage/getCompletion', () => {
+    afterEach(() => {
+      delete process.env.AZURE_OPENAI_DEFAULT_MODEL;
+      delete process.env.AZURE_USE_MODEL_AS_DEPLOYMENT_NAME;
+    });
+
+    it('[Azure OpenAI] should call getCompletion and fetchEventSource with correct args', async () => {
+      // Set a default model
+      process.env.AZURE_OPENAI_DEFAULT_MODEL = 'gpt4-turbo';
+
+      const onProgress = jest.fn().mockImplementation(() => ({}));
+      client.azure = defaultAzureOptions;
+      const getCompletion = jest.spyOn(client, 'getCompletion');
+      await client.sendMessage('Hi mom!', {
+        replaceOptions: true,
+        ...defaultOptions,
+        onProgress,
+        azure: defaultAzureOptions,
+      });
+
+      expect(getCompletion).toHaveBeenCalled();
+      expect(getCompletion.mock.calls.length).toBe(1);
+      expect(getCompletion.mock.calls[0][0][0].role).toBe('user');
+      expect(getCompletion.mock.calls[0][0][0].content).toBe('Hi mom!');
+
+      expect(fetchEventSource).toHaveBeenCalled();
+      expect(fetchEventSource.mock.calls.length).toBe(1);
+
+      // Check if the first argument (url) is correct
+      const expectedURL = genAzureChatCompletion(defaultAzureOptions);
+      const firstCallArgs = fetchEventSource.mock.calls[0];
+
+      expect(firstCallArgs[0]).toBe(expectedURL);
+      // Should not have model in the deployment name
+      expect(firstCallArgs[0]).not.toContain('gpt4-turbo');
+
+      // Should not include the model in request body
+      const requestBody = JSON.parse(firstCallArgs[1].body);
+      expect(requestBody).not.toHaveProperty('model');
     });
   });
 });

@@ -1,7 +1,9 @@
-const connectDb = require('@librechat/backend/lib/db/connectDb');
-const { registerUser } = require('@librechat/backend/server/services/AuthService');
+const path = require('path');
+require('module-alias')({ base: path.resolve(__dirname, '..', 'api') });
+const { registerUser } = require('~/server/services/AuthService');
 const { askQuestion, silentExit } = require('./helpers');
-const User = require('@librechat/backend/models/User');
+const connectDb = require('~/lib/db/connectDb');
+const User = require('~/models/User');
 
 (async () => {
   /**
@@ -127,6 +129,22 @@ const User = require('@librechat/backend/models/User');
   }
 
   // Done!
-  console.green('User created successfully!');
-  silentExit(0);
+  const userCreated = await User.findOne({ $or: [{ email }, { username }] });
+  if (userCreated) {
+    console.green('User created successfully!');
+    silentExit(0);
+  }
 })();
+
+process.on('uncaughtException', (err) => {
+  if (!err.message.includes('fetch failed')) {
+    console.error('There was an uncaught error:');
+    console.error(err);
+  }
+
+  if (err.message.includes('fetch failed')) {
+    return;
+  } else {
+    process.exit(1);
+  }
+});

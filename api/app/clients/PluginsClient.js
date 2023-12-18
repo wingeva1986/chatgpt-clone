@@ -3,11 +3,14 @@ const { CallbackManager } = require('langchain/callbacks');
 const { BufferMemory, ChatMessageHistory } = require('langchain/memory');
 const { initializeCustomAgent, initializeFunctionsAgent } = require('./agents');
 const { addImages, buildErrorInput, buildPromptPrefix } = require('./output_parsers');
-const checkBalance = require('../../models/checkBalance');
+const { EModelEndpoint } = require('librechat-data-provider');
 const { formatLangChainMessages } = require('./prompts');
-const { isEnabled } = require('../../server/utils');
+const checkBalance = require('~/models/checkBalance');
 const { SelfReflectionTool } = require('./tools');
+const { isEnabled } = require('~/server/utils');
+const { extractBaseURL } = require('~/utils');
 const { loadTools } = require('./tools/util');
+const { logger } = require('~/config');
 
 class PluginsClient extends OpenAIClient {
   constructor(apiKey, options = {}) {
@@ -34,11 +37,7 @@ class PluginsClient extends OpenAIClient {
     this.isGpt3 = this.modelOptions?.model?.includes('gpt-3');
 
     if (this.options.reverseProxyUrl) {
-      this.langchainProxy = this.options.reverseProxyUrl.match(/.*v1/)?.[0];
-      !this.langchainProxy &&
-        console.warn(`The reverse proxy URL ${this.options.reverseProxyUrl} is not valid for Plugins.
-The url must follow OpenAI specs, for example: https://localhost:8080/v1/chat/completions
-If your reverse proxy is compatible to OpenAI specs in every other way, it may still work without plugins enabled.`);
+      this.langchainProxy = extractBaseURL(this.options.reverseProxyUrl);
     }
   }
 
@@ -56,7 +55,9 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
   }
 
   getFunctionModelName(input) {
-    if (input.includes('gpt-3.5-turbo')) {
+    if (/-(?!0314)\d{4}/.test(input)) {
+      return input;
+    } else if (input.includes('gpt-3.5-turbo')) {
       return 'gpt-3.5-turbo';
     } else if (input.includes('gpt-4')) {
       return 'gpt-4';
@@ -85,17 +86,15 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
       initialMessageCount: this.currentMessages.length + 1,
     });
 
-    if (this.options.debug) {
-      console.debug(
-        `<-----Agent Model: ${model.modelName} | Temp: ${model.temperature} | Functions: ${this.functionsAgent}----->`,
-      );
-    }
+    logger.debug(
+      `[PluginsClient] Agent Model: ${model.modelName} | Temp: ${model.temperature} | Functions: ${this.functionsAgent}`,
+    );
 
     // Map Messages to Langchain format
     const pastMessages = formatLangChainMessages(this.currentMessages.slice(0, -1), {
       userName: this.options?.name,
     });
-    this.options.debug && console.debug('pastMessages: ', pastMessages);
+    logger.debug('[PluginsClient] pastMessages: ' + pastMessages.length);
 
     // TODO: use readOnly memory, TokenBufferMemory? (both unavailable in LangChainJS)
     const memory = new BufferMemory({
@@ -124,19 +123,16 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
       return;
     }
 
-    if (this.options.debug) {
-      console.debug('Requested Tools');
-      console.debug(this.options.tools);
-      console.debug('Loaded Tools');
-      console.debug(this.tools.map((tool) => tool.name));
-    }
+    logger.debug('[PluginsClient] Requested Tools', this.options.tools);
+    logger.debug(
+      '[PluginsClient] Loaded Tools',
+      this.tools.map((tool) => tool.name),
+    );
 
     const handleAction = (action, runId, callback = null) => {
       this.saveLatestAction(action);
 
-      if (this.options.debug) {
-        console.debug('Latest Agent Action ', this.actions[this.actions.length - 1]);
-      }
+      logger.debug('[PluginsClient] Latest Agent Action ', this.actions[this.actions.length - 1]);
 
       if (typeof callback === 'function') {
         callback(action, runId);
@@ -165,9 +161,7 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
       }),
     });
 
-    if (this.options.debug) {
-      console.debug('Loaded agent.');
-    }
+    logger.debug('[PluginsClient] Loaded agent.');
   }
 
   async executorCall(message, { signal, stream, onToolStart, onToolEnd }) {
@@ -183,12 +177,10 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
       });
       const input = attempts > 1 ? errorInput : message;
 
-      if (this.options.debug) {
-        console.debug(`Attempt ${attempts} of ${maxAttempts}`);
-      }
+      logger.debug(`[PluginsClient] Attempt ${attempts} of ${maxAttempts}`);
 
-      if (this.options.debug && errorMessage.length > 0) {
-        console.debug('Caught error, input:', input);
+      if (errorMessage.length > 0) {
+        logger.debug('[PluginsClient] Caught error, input: ' + JSON.stringify(input));
       }
 
       try {
@@ -211,10 +203,10 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
         ]);
         break; // Exit the loop if the function call is successful
       } catch (err) {
-        console.error(err);
+        logger.error('[PluginsClient] executorCall error:', err);
         if (attempts === maxAttempts) {
           const { run } = this.runManager.getRunByConversationId(this.conversationId);
-          const defaultOutput = `Encountered an error while attempting to respond. Error: ${err.message}`;
+          const defaultOutput = `Encountered an error while attempting to respond: ${err.message}`;
           this.result.output = run && run.error ? run.error : defaultOutput;
           this.result.errorMessage = run && run.error ? run.error : err.message;
           this.result.intermediateSteps = this.actions;
@@ -226,17 +218,22 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
 
   async handleResponseMessage(responseMessage, saveOptions, user) {
     const { output, errorMessage, ...result } = this.result;
-    this.options.debug &&
-      console.debug('[handleResponseMessage] Output:', { output, errorMessage, ...result });
+    logger.debug('[PluginsClient][handleResponseMessage] Output:', {
+      output,
+      errorMessage,
+      ...result,
+    });
     const { error } = responseMessage;
     if (!error) {
-      responseMessage.tokenCount = this.getTokenCount(responseMessage.text);
-      responseMessage.completionTokens = responseMessage.tokenCount;
+      responseMessage.tokenCount = this.getTokenCountForResponse(responseMessage);
+      responseMessage.completionTokens = this.getTokenCount(responseMessage.text);
     }
 
+    // Record usage only when completion is skipped as it is already recorded in the agent phase.
     if (!this.agentOptions.skipCompletion && !error) {
       await this.recordTokenUsage(responseMessage);
     }
+
     await this.saveMessageToDatabase(responseMessage, saveOptions, user);
     delete responseMessage.tokenCount;
     return { ...responseMessage, ...result };
@@ -249,7 +246,7 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
       this.setOptions(opts);
       return super.sendMessage(message, opts);
     }
-    this.options.debug && console.log('Plugins sendMessage', message, opts);
+    logger.debug('[PluginsClient] sendMessage', { message, opts });
     const {
       user,
       isEdited,
@@ -279,10 +276,10 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
     );
 
     if (tokenCountMap) {
-      console.dir(tokenCountMap, { depth: null });
+      logger.debug('[PluginsClient] tokenCountMap', { tokenCountMap });
       if (tokenCountMap[userMessage.messageId]) {
         userMessage.tokenCount = tokenCountMap[userMessage.messageId];
-        console.log('userMessage.tokenCount', userMessage.tokenCount);
+        logger.debug('[PluginsClient] userMessage.tokenCount', userMessage.tokenCount);
       }
       this.handleTokenCountMap(tokenCountMap);
     }
@@ -303,6 +300,7 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
           amount: promptTokens,
           debug: this.options.debug,
           model: this.modelOptions.model,
+          endpoint: EModelEndpoint.openAI,
         },
       });
     }
@@ -355,6 +353,7 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
       const trimmedPartial = opts.getPartialText().replaceAll(':::plugin:::\n', '');
       responseMessage.text =
         trimmedPartial.length === 0 ? `${partialText}${this.result.output}` : partialText;
+      addImages(this.result.intermediateSteps, responseMessage);
       await this.generateTextStream(this.result.output, opts.onProgress, { delay: 5 });
       return await this.handleResponseMessage(responseMessage, saveOptions, user);
     }
@@ -366,10 +365,7 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
       return await this.handleResponseMessage(responseMessage, saveOptions, user);
     }
 
-    if (this.options.debug) {
-      console.debug('Plugins completion phase: this.result');
-      console.debug(this.result);
-    }
+    logger.debug('[PluginsClient] Completion phase: this.result', this.result);
 
     const promptPrefix = buildPromptPrefix({
       result: this.result,
@@ -377,28 +373,20 @@ If your reverse proxy is compatible to OpenAI specs in every other way, it may s
       functionsAgent: this.functionsAgent,
     });
 
-    if (this.options.debug) {
-      console.debug('Plugins: promptPrefix');
-      console.debug(promptPrefix);
-    }
+    logger.debug('[PluginsClient]', { promptPrefix });
 
     payload = await this.buildCompletionPrompt({
       messages: this.currentMessages,
       promptPrefix,
     });
 
-    if (this.options.debug) {
-      console.debug('buildCompletionPrompt Payload');
-      console.debug(payload);
-    }
+    logger.debug('[PluginsClient] buildCompletionPrompt Payload', payload);
     responseMessage.text = await this.sendCompletion(payload, opts);
     return await this.handleResponseMessage(responseMessage, saveOptions, user);
   }
 
   async buildCompletionPrompt({ messages, promptPrefix: _promptPrefix }) {
-    if (this.options.debug) {
-      console.debug('buildCompletionPrompt messages', messages);
-    }
+    logger.debug('[PluginsClient] buildCompletionPrompt messages', messages);
 
     const orderedMessages = messages;
     let promptPrefix = _promptPrefix.trim();

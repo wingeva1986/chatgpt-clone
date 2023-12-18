@@ -1,6 +1,22 @@
 const { HumanMessage, AIMessage, SystemMessage } = require('langchain/schema');
 
 /**
+ * Formats a message to OpenAI Vision API payload format.
+ *
+ * @param {Object} params - The parameters for formatting.
+ * @param {Object} params.message - The message object to format.
+ * @param {string} [params.message.role] - The role of the message sender (must be 'user').
+ * @param {string} [params.message.content] - The text content of the message.
+ * @param {Array<string>} [params.image_urls] - The image_urls to attach to the message.
+ * @returns {(Object)} - The formatted message.
+ */
+const formatVisionMessage = ({ message, image_urls }) => {
+  message.content = [{ type: 'text', text: message.content }, ...image_urls];
+
+  return message;
+};
+
+/**
  * Formats a message to OpenAI payload format based on the provided options.
  *
  * @param {Object} params - The parameters for formatting.
@@ -10,6 +26,7 @@ const { HumanMessage, AIMessage, SystemMessage } = require('langchain/schema');
  * @param {string} [params.message.sender] - The sender of the message.
  * @param {string} [params.message.text] - The text content of the message.
  * @param {string} [params.message.content] - The content of the message.
+ * @param {Array<string>} [params.message.image_urls] - The image_urls attached to the message for Vision API.
  * @param {string} [params.userName] - The name of the user.
  * @param {string} [params.assistantName] - The name of the assistant.
  * @param {boolean} [params.langChain=false] - Whether to return a LangChain message object.
@@ -32,6 +49,11 @@ const formatMessage = ({ message, userName, assistantName, langChain = false }) 
     content,
   };
 
+  const { image_urls } = message;
+  if (Array.isArray(image_urls) && image_urls.length > 0 && role === 'user') {
+    return formatVisionMessage({ message: formattedMessage, image_urls: message.image_urls });
+  }
+
   if (_name) {
     formattedMessage.name = _name;
   }
@@ -42,6 +64,16 @@ const formatMessage = ({ message, userName, assistantName, langChain = false }) 
 
   if (assistantName && formattedMessage.role === 'assistant') {
     formattedMessage.name = assistantName;
+  }
+
+  if (formattedMessage.name) {
+    // Conform to API regex: ^[a-zA-Z0-9_-]{1,64}$
+    // https://community.openai.com/t/the-format-of-the-name-field-in-the-documentation-is-incorrect/175684/2
+    formattedMessage.name = formattedMessage.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    if (formattedMessage.name.length > 64) {
+      formattedMessage.name = formattedMessage.name.substring(0, 64);
+    }
   }
 
   if (!langChain) {
